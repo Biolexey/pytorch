@@ -37,11 +37,12 @@ for i in range(1, 6):
     #最適化処理
     optimizer.step()
     print(f"{i}回目で{loss_train}の誤差")
-    print(f"この時、a = {model.weight}, b = {model.bias}")
+    print(f"この時、a = {model.weight},\n b = {model.bias}")
 
 x_result = torch.arange(3, 7).unsqueeze(1).float()
 y = model(x_result)
 #求めた漸近線をプロット
+#yは requires_grad = True なのでdetach()で切り離す。
 plt.plot(x_result, y.detach())
 #訓練データを散布図として表示
 plt.scatter(x_train, t_train)
