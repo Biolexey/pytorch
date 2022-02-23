@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
+#簡単のためシード値を固定
 torch.manual_seed(1)
 
 x = torch.normal(5, 1, size = (10,))
@@ -16,8 +17,11 @@ print(f"t_train = {t_train}")
 #plt.scatter(x_train, t_train)
 #plt.show()
 
+#モデルは一次関数
 model = nn.Linear(1, 1)
+#損失関数は平均二乗誤差
 criterion = nn.MSELoss()
+#確率的勾配降下法
 optimizer = optim.SGD(model.parameters(), lr = 1e-2)
 
 #パラメータを表示
