@@ -23,36 +23,37 @@ image = x[0,].view(28, 28).detach().numpy()
 plt.imshow(image, cmap = "binary_r")
 plt.show()
 
-"""
-class Model(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.l1 = nn.Linear(784, 200)
-        self.a1 = nn.ReLU()
-        self.l2 = nn.Linear(200, 10)
-    
-    def forward(self, x):
-        x = self.l1(x)
-        x = self.a1(x)
-        x = self.l2(x)
-        return x
-"""
+#gglcolabの場合はGPU駆動
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(device)
 
-#線形変換(パラメータ持ち)のみ定義してあげるので十分
-class Model(nn.Module):
+class Model1(nn.Module):
     def __init__(self):
         super().__init__()
         self.l1 = nn.Linear(784, 200)
+        self.do = nn.Dropout(0.1)
         self.l2 = nn.Linear(200, 10)
-    
     def forward(self, x):
         x = self.l1(x)
         x = torch.relu(x)
+        x = self.do(x)
         x = self.l2(x)
         return x
 
-#model = nn.Sequential(nn.Linear(784, 200), nn.ReLU(), nn.Linear(200, 10))
-model = Model()
+class Model2(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.l1 = nn.Linear(784, 200)
+        self.bn = nn.BatchNorm1d(200)
+        self.l2 = nn.Linear(200, 10)
+    def forward(self, x):
+        x = self.l1(x)
+        x = torch.bn(x)
+        x = self.do(x)
+        x = self.l2(x)
+        return x    
+
+model = Model1().to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(model.parameters(), lr = 1e-2)
 
@@ -61,13 +62,16 @@ acc_train_all = []
 loss_test_all = []
 acc_test_all = []
 
-for epoch in range(1, 50+1):
+for epoch in range(1, 20+1):
     loss_train = 0
     acc_train = 0
     loss_test = 0
     acc_test = 0
 
+#
+    model.train()
     for x, t in train_dataloader:
+        x, t = x.to(device), t.to(device)
         y = model(x)
         loss = criterion(y, t)
         optimizer.zero_grad()
@@ -80,8 +84,10 @@ for epoch in range(1, 50+1):
     loss_train_mean = loss_train / len(train_dataloader)
     acc_train_mean = acc_train / len(train_dataloader)
 
+    model.eval()
     with torch.no_grad():
         for x, t in train_dataloader:
+            x, t = x.to(device), t.to(device)
             y = model(x)
             loss = criterion(y, t)
 
@@ -113,3 +119,4 @@ ax2.plot(range(1, len(acc_train_all)+1), acc_train_all, label = "train")
 ax2.plot(range(1, len(acc_test_all)+1), acc_test_all, label = "test")
 ax2.legend()
 plt.show()
+
