@@ -10,40 +10,47 @@ import torch.nn.functional as F
 import matplotlib.pyplot as plt
 torch.manual_seed(1)
 
-#ベクトルに直す前処理を削除
+#ベクトルに直す前処理(.view(-1))を削除
+#transformについてはhttps://pystyle.info/pytorch-list-of-transforms/ を参照
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0), (1))])
 
+#rootディレクトリを指定してMNIST画像ファイルをそこに保存
 root = "./data"
 mnist_train = datasets.MNIST(root = root, download = True, train = True, transform = transform)
 mnist_test = datasets.MNIST(root = root, download = True, train = False, transform = transform)
 
+#dataloaderに画像ファイルを設定する(バッチサイズは100に設定)
 train_dataloader = DataLoader(mnist_train, batch_size = 100, shuffle = True)
 test_dataloader = DataLoader(mnist_train, batch_size = 100, shuffle = False)
 
+#dataloaderが機能しているか画像を表示して確認
 x, t = next(iter(train_dataloader))
 image = x[0,].view(28, 28).detach().numpy()
 plt.imshow(image, cmap = "binary_r")
 plt.show()
 
-#gglcolabの場合はGPU駆動
+#gglcolabの場合はGPU駆動に設定
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(device)
+print(device)#確認
 
 class Model(nn.Module):
+    #Modelを定義
     def __init__(self):
         super().__init__()
-        self.c1 = nn.Conv2d(1, 32, kernel_size = 4, stride = 2, padding = 1)
+        #(input channels, output channels, kernel, stride, padding)
+        self.c1 = nn.Conv2d(1, 32, kernel_size = 4, stride = 2, padding = 1)#28*28→14*14
         self.b1 = nn.BatchNorm2d(32)
-        self.c2 = nn.Conv2d(32, 64, kernel_size = 4, stride = 2, padding = 1)
+        self.c2 = nn.Conv2d(32, 64, kernel_size = 4, stride = 2, padding = 1)#14*14→7*7
         self.b2 = nn.BatchNorm2d(64)
         self.l1 = nn.Linear(576, 128)
         self.b3 = nn.BatchNorm1d(128)
         self.l2 = nn.Linear(128, 10)
+    #forward計算式
     def forward(self, x):
         x = torch.relu(self.b1(self.c1(x)))
-        x = F.max_pool2d(torch.relu(self.b2(self.c2(x))), 2)
+        x = F.max_pool2d(torch.relu(self.b2(self.c2(x))), 2)#7*7→3*3
         #ここでベクトルに変換
-        x = x.view(-1, 576)
+        x = x.view(-1, 576)#576=3*3*64
         x = torch.relu(self.b3(self.l1(x)))
         x = self.l2(x)
         return x
