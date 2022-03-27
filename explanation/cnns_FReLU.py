@@ -9,6 +9,8 @@ import torch.optim as optim
 
 import matplotlib.pyplot as plt
 
+from ..functions.FReLU import FReLU
+
 EPOCH = 20
 BATCH_SIZE = 100
 
@@ -38,7 +40,7 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False,
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.relu = nn.ReLU()
+        self.frelu = nn.FReLU()
         self.pool = nn.MaxPool2d(2, stride=2)
 
         self.conv1 = nn.Conv2d(1, 16, 3)
@@ -49,14 +51,14 @@ class Net(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)#28→26
-        x = self.relu(x)
+        x = self.frelu(x)
         x = self.pool(x)#26→13
         x = self.conv2(x)#13→11
-        x = self.relu(x)
+        x = self.frelu(x)
         x = self.pool(x)#11→5
         x = x.view(x.size()[0], -1)#ここでベクトルに直す
         x = self.fc1(x)
-        x = self.relu(x)
+        x = self.frelu(x)
         x = self.fc2(x)
         return x
 
