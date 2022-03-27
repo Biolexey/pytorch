@@ -8,8 +8,21 @@ import torch.nn as nn
 import torch.optim as optim
 
 import matplotlib.pyplot as plt
+"""
+import sys
+sys.path.append("..")
+from functions.FReLU import FReLU
+"""
 
-from ..functions.FReLU import FReLU
+class FReLU(nn.Module):
+    def __init__(self, inp, kernel=3, stride=1, padding=1):
+        super().__init__()
+        self.FC = nn.Conv2d(inp, inp, kernel_size=kernel, stride=stride, padding=padding, groups=inp)  #Depthwise畳み込み
+        self.bn = nn.BatchNorm2d(inp)
+
+    def forward(self, x):
+        dx = self.bn(self.FC(x))
+        return torch.max(x, dx)
 
 EPOCH = 20
 BATCH_SIZE = 100
@@ -40,7 +53,9 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False,
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.frelu = FReLU()
+        self.frelu16 = FReLU(16)
+        self.frelu32 = FReLU(32)
+        self.relu = nn.ReLU()
         self.pool = nn.MaxPool2d(2, stride=2)
 
         self.conv1 = nn.Conv2d(1, 16, 3)
@@ -51,14 +66,14 @@ class Net(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)#28→26
-        x = self.frelu(x)
+        x = self.frelu16(x)
         x = self.pool(x)#26→13
         x = self.conv2(x)#13→11
-        x = self.frelu(x)
+        x = self.frelu32(x)
         x = self.pool(x)#11→5
         x = x.view(x.size()[0], -1)#ここでベクトルに直す
         x = self.fc1(x)
-        x = self.frelu(x)
+        x = self.relu(x)
         x = self.fc2(x)
         return x
 

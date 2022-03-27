@@ -5,10 +5,10 @@ import torch
 import torch.nn as nn
 
 class FReLU(nn.Module):
-    def __init__(self, input, kernel=3, stride=1, padding=1):
+    def __init__(self, inp, kernel=3, stride=1, padding=1):
         super().__init__()
-        self.FC = nn.Conv2d(input, input, kernel=kernel, stride=stride, padding=padding, groups=input)  #Depthwise畳み込み
-        self.bn = nn.BatchNorm2d(input)
+        self.FC = nn.Conv2d(inp, inp, kernel_size=kernel, stride=stride, padding=padding, groups=inp)  #Depthwise畳み込み
+        self.bn = nn.BatchNorm2d(inp)
 
     def forward(self, x):
         dx = self.bn(self.FC(x))
