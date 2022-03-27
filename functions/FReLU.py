@@ -7,7 +7,7 @@ import torch.nn as nn
 class FReLU(nn.Module):
     def __init__(self, input, kernel=3, stride=1, padding=1):
         super().__init__()
-        self.FC = nn.conv2d(input, input, kernel=kernel, stride=stride, padding=padding, groups=input)  #Depthwise畳み込み
+        self.FC = nn.Conv2d(input, input, kernel=kernel, stride=stride, padding=padding, groups=input)  #Depthwise畳み込み
         self.bn = nn.BatchNorm2d(input)
 
     def forward(self, x):

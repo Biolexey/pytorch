@@ -40,7 +40,7 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False,
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.frelu = nn.FReLU()
+        self.frelu = FReLU()
         self.pool = nn.MaxPool2d(2, stride=2)
 
         self.conv1 = nn.Conv2d(1, 16, 3)
