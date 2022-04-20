@@ -31,7 +31,7 @@ BATCH_SIZE = 100
 #テンソル化と正規化を行う
 trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0), (1))])
 
-#データのダウンロード
+#データのダウンロード(ここではMNISTを用いる)
 trainset = torchvision.datasets.MNIST(root="./data", train=True, download=True, transform=trans)
 #print(trainset[0])
 
@@ -57,7 +57,6 @@ class Net(nn.Module):
         self.frelu32 = FReLU(32)
         self.relu = nn.ReLU()
         self.pool = nn.MaxPool2d(2, stride=2)
-
         self.conv1 = nn.Conv2d(1, 16, 3)
         self.conv2 = nn.Conv2d(16, 32, 3)
 
@@ -77,11 +76,12 @@ class Net(nn.Module):
         x = self.fc2(x)
         return x
 
-#モデルの準備と損失関数と最適化手法の設定
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#GPU使用可能ならGPU駆動に設定
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")   
 net = Net().to(device)
+#モデルの準備と損失関数と最適化手法の設定
 criterion = nn.CrossEntropyLoss()#損失関数はクロスエントロピー誤差
-#最適化は確率的勾配降下法
+#最適化は確率的勾配降下法(SGD)
 #lrは学習率、momentumは慣性項(大きいほど更新量大)、weight_decayは正則化項(大きいほど過学習抑制)
 optimizer = optim.SGD(net.parameters(), lr=1e-2, momentum=0.9, weight_decay=0.005)
 
@@ -91,7 +91,7 @@ test_loss_value=[]       #testのlossを保持するlist
 test_acc_value=[]        #testのaccuracyを保持するlist 
 
 #学習
-for epoch in range(EPOCH):#epoch=学習回数=20
+for epoch in range(EPOCH):  #epoch=学習回数=20
         
     sum_loss = 0.0
     sum_correct = 0
