@@ -14,7 +14,7 @@ sys.path.append("..")
 from functions.FReLU import FReLU
 """
 
-class FReLU(nn.Module):
+class FReLU(nn.Module):             #FReLU関数を定義
     def __init__(self, inp, kernel=3, stride=1, padding=1):
         super().__init__()
         self.FC = nn.Conv2d(inp, inp, kernel_size=kernel, stride=stride, padding=padding, groups=inp)  #Depthwise畳み込み
