@@ -9,6 +9,7 @@ import torch.optim as optim
 
 import matplotlib.pyplot as plt
 
+import networks.ResNets_FReLU as res
 
 EPOCH = 20
 BATCH_SIZE = 100
@@ -18,7 +19,7 @@ BATCH_SIZE = 100
 trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0), (1))])
 
 #データのダウンロード
-trainset = torchvision.datasets.MNIST(root="./data", train=True, download=True, transform=trans)
+trainset = torchvision.datasets.STL10(root="./data", split="train", download=True, transform=trans)
 #print(trainset[0])
 
 #dataloaderの設定
@@ -32,38 +33,12 @@ for data, label in trainloader:
 print(label)
 """
 #テストデータも同様に取得(シャッフルは無効)
-testset = torchvision.datasets.MNIST(root="./data", train=False, download=True, transform=trans)
+testset = torchvision.datasets.STL10(root="./data", split="test", download=True, transform=trans)
 testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=0)
-
-#モデルの定義
-class Net(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.relu = nn.ReLU()
-        self.pool = nn.MaxPool2d(2, stride=2)
-
-        self.conv1 = nn.Conv2d(1, 16, 3)
-        self.conv2 = nn.Conv2d(16, 32, 3)
-
-        self.fc1 = nn.Linear(32*5*5, 120)
-        self.fc2 = nn.Linear(120, 10)
-
-    def forward(self, x):
-        x = self.conv1(x)#28→26
-        x = self.relu(x)
-        x = self.pool(x)#26→13
-        x = self.conv2(x)#13→11
-        x = self.relu(x)
-        x = self.pool(x)#11→5
-        x = x.view(x.size()[0], -1)#ここでベクトルに直す
-        x = self.fc1(x)
-        x = self.relu(x)
-        x = self.fc2(x)
-        return x
 
 #モデルの準備と損失関数と最適化手法の設定
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-net = Net().to(device)
+net = res.resnet18().to(device)
 criterion = nn.CrossEntropyLoss()#損失関数はクロスエントロピー誤差
 #最適化は確率的勾配降下法
 #lrは学習率、momentumは慣性項(大きいほど更新量大)、weight_decayは正則化項(大きいほど過学習抑制)

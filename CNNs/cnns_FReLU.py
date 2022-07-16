@@ -32,7 +32,7 @@ BATCH_SIZE = 100
 trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0), (1))])
 
 #データのダウンロード(ここではMNISTを用いる)
-trainset = torchvision.datasets.MNIST(root="./data", train=True, download=True, transform=trans)
+trainset = torchvision.datasets.STL10(root="./data", split="train", download=True, transform=trans)
 #print(trainset[0])
 
 #dataloaderの設定
@@ -46,7 +46,7 @@ for data, label in trainloader:
 print(label)
 """
 #テストデータも同様に取得(シャッフルは無効)
-testset = torchvision.datasets.MNIST(root="./data", train=False, download=True, transform=trans)
+testset = torchvision.datasets.STL10(root="./data", split="test", download=True, transform=trans)
 testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=0)
 
 #モデルの定義
